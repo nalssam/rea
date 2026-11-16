@@ -1,0 +1,10 @@
+node_modules/
+.env
+.env.*
+*.log
+*.mp4
+*.mp3
+*.webm
+*.m4a
+*.part
+.DS_Store

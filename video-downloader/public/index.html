@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="YouTube, Instagram, Threads, Facebook 공개 영상 링크를 여러 개 모아 MP4 또는 MP3로 한 번에 저장합니다.">
+  <title>모아받기</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#composer-input">링크 입력으로 건너뛰기</a>
+
+  <header class="site-header">
+    <div class="wrap header-row">
+      <a class="brand" href="./" aria-label="처음으로">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+          <rect class="bm-1" x="4" y="4" width="24" height="6" rx="3"/>
+          <rect class="bm-2" x="4" y="13" width="24" height="6" rx="3"/>
+          <path class="bm-3" d="M7 22h18a3 3 0 0 1 0 6H7a3 3 0 0 1 0-6Z"/>
+          <path class="bm-arrow" d="M16 6.5v12m0 0-4.2-4.2M16 18.500l4.2-4.2" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="brand-name" data-site-name>모아받기</span>
+      </a>
+      <button type="button" class="icon-btn" id="theme-toggle" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="ico ico-sun">
+          <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M12 2.8v2.4M12 18.800v2.4M2.8 12h2.4M18.800 12h2.4M5.500 5.500l1.700 1.700M16.800 16.800l1.700 1.700M5.500 18.500l1.700-1.700M16.800 7.200l1.700-1.700" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="ico ico-moon">
+          <path d="M20 14.200A8 8 0 0 1 9.800 4a8 8 0 1 0 10.200 10.200Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+        </svg>
+        <span class="icon-btn-label" id="theme-toggle-label">어두운 화면</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero" aria-labelledby="hero-title">
+      <p class="eyebrow">YouTube · Instagram · Threads · Facebook</p>
+      <h1 id="hero-title">링크를 <span class="hl">모아서</span>,<br class="br-narrow"> 한 번에 받기</h1>
+      <p class="lede">링크를 붙여넣는 대로 아래에 쌓입니다. 여러 개를 한꺼번에 붙여넣어도, 하나씩 연달아 붙여넣어도 됩니다. 다 모았으면 각각의 파일로 한 번에 저장하세요.</p>
+
+      <form class="composer" id="composer" novalidate>
+        <label class="composer-label" for="composer-input">영상 링크</label>
+        <div class="composer-box">
+          <textarea id="composer-input" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off"
+            placeholder="여기에 링크를 붙여넣으세요 — 여러 개도 한 번에 됩니다" aria-describedby="composer-help"></textarea>
+          <div class="composer-foot">
+            <p class="composer-help" id="composer-help">붙여넣기 또는 Enter로 바로 추가 · 줄바꿈은 Shift+Enter</p>
+            <button type="submit" class="btn btn-ink" id="add-btn">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="ico"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.200" stroke-linecap="round"/></svg>
+              추가
+            </button>
+          </div>
+        </div>
+        <p class="composer-feedback" id="composer-feedback" role="status" aria-live="polite"></p>
+      </form>
+
+      <div class="rejected" id="rejected" hidden>
+        <div class="rejected-head">
+          <h2 class="rejected-title">추가하지 못한 링크 <span id="rejected-count"></span></h2>
+          <button type="button" class="link-btn" id="rejected-clear">지우기</button>
+        </div>
+        <ul class="rejected-list" id="rejected-list"></ul>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="queue" aria-labelledby="queue-title">
+        <div class="toolbar">
+          <div class="toolbar-top">
+            <h2 id="queue-title">받을 목록 <span class="count-pill" id="list-count">0</span></h2>
+            <p class="summary" id="summary" role="status" aria-live="polite"></p>
+          </div>
+          <div class="toolbar-controls">
+            <label class="field" for="global-format">
+              <span class="field-label">전체 형식</span>
+              <select id="global-format" class="select"></select>
+            </label>
+            <div class="toolbar-actions">
+              <button type="button" class="btn btn-ghost" id="clear-all" disabled>목록 비우기</button>
+              <button type="button" class="btn btn-ghost btn-danger" id="cancel-all" hidden>모두 취소</button>
+              <button type="button" class="btn btn-primary" id="download-all" disabled>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="ico"><path d="M12 4v11m0 0-4.500-4.500M12 15l4.500-4.500M5 19.500h14" fill="none" stroke="currentColor" stroke-width="2.200" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span id="download-all-label">모두 받기 (0)</span>
+              </button>
+            </div>
+          </div>
+          <p class="hint" id="multi-hint">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="ico"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.800"/><path d="M12 11v5.500M12 7.600v.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            파일은 하나씩 따로 저장됩니다. 브라우저가 “여러 파일 다운로드”를 허용할지 물으면 허용을 눌러 주세요.
+          </p>
+        </div>
+
+        <ol class="cards" id="cards" aria-label="받을 영상 목록"></ol>
+
+        <div class="empty" id="empty">
+          <svg viewBox="0 0 120 84" aria-hidden="true" focusable="false" class="empty-art">
+            <rect class="ea-1" x="14" y="8" width="92" height="18" rx="6"/>
+            <rect class="ea-2" x="14" y="33" width="92" height="18" rx="6"/>
+            <rect class="ea-3" x="14" y="58" width="92" height="18" rx="6"/>
+            <rect class="ea-t" x="20" y="13" width="14" height="8" rx="2"/>
+            <rect class="ea-t" x="20" y="38" width="14" height="8" rx="2"/>
+            <rect class="ea-t" x="20" y="63" width="14" height="8" rx="2"/>
+          </svg>
+          <p class="empty-title">아직 모은 링크가 없어요</p>
+          <p class="empty-text">위 입력란에 링크를 붙여넣으면 여기에 차곡차곡 쌓입니다.</p>
+        </div>
+      </section>
+
+      <aside class="side" aria-label="서비스 상태와 안내">
+        <section class="panel" aria-labelledby="status-title">
+          <h2 id="status-title" class="panel-title">
+            지금 상태
+            <span class="live-dot" id="live-dot" data-state="idle" aria-hidden="true"></span>
+          </h2>
+          <dl class="stats" id="status-box" aria-live="off">
+            <div class="stat">
+              <dt>현재 다운로드</dt>
+              <dd><span id="st-active">–</span><span class="stat-of">/ <span id="st-max">–</span></span></dd>
+              <div class="meter" aria-hidden="true"><span id="st-active-bar"></span></div>
+            </div>
+            <div class="stat">
+              <dt>대기</dt>
+              <dd><span id="st-queued">–</span><span class="stat-of">건</span></dd>
+            </div>
+            <div class="stat">
+              <dt>오늘 내 횟수</dt>
+              <dd><span id="st-today">–</span><span class="stat-of">/ <span id="st-daily">–</span></span></dd>
+              <div class="meter" aria-hidden="true"><span id="st-today-bar"></span></div>
+            </div>
+          </dl>
+          <p class="panel-note" id="status-note"></p>
+        </section>
+
+        <section class="panel" aria-labelledby="limits-title">
+          <h2 id="limits-title" class="panel-title">이용 한도</h2>
+          <ul class="limits" id="limits">
+            <li><span>한 번에 모을 수 있는 링크</span><strong id="lm-batch">–</strong></li>
+            <li><span>최고 화질</span><strong id="lm-height">–</strong></li>
+            <li><span>파일 크기</span><strong id="lm-size">–</strong></li>
+            <li><span>하루 횟수</span><strong id="lm-daily">–</strong></li>
+            <li><span>파일 보관 시간</span><strong id="lm-ttl">–</strong></li>
+          </ul>
+          <ul class="platforms" id="platforms" aria-label="지원 사이트"></ul>
+        </section>
+
+        <section class="panel panel-notice" aria-labelledby="notice-title">
+          <h2 id="notice-title" class="panel-title">꼭 지켜 주세요</h2>
+          <p>본인이 만든 영상이거나 저장해도 된다는 허락을 받은 공개 콘텐츠만 내려받으세요. 저작권과 각 서비스의 이용약관을 지킬 책임은 이용자에게 있습니다.</p>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p><span data-site-name>모아받기</span> · 공개 영상만 처리하며, 파일은 전송 후 서버에서 바로 지워집니다.</p>
+    </div>
+  </footer>
+
+  <noscript><p class="noscript">이 페이지는 JavaScript가 켜져 있어야 동작합니다.</p></noscript>
+</body>
+</html>

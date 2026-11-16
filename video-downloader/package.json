@@ -1,0 +1,12 @@
+{
+  "name": "moabatgi",
+  "version": "0.1.0",
+  "private": true,
+  "description": "여러 영상 링크를 한 번에 MP4/MP3로 내려받는 셀프 호스팅 웹 앱",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test \"test/*.test.js\""
+  }
+}
